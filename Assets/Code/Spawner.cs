@@ -1,10 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
     public GameObject spritePrefab; // Reference to the sprite prefab
     public int maxSpawnedItems = 5; // Maximum number of spawned items
-    public Vector2 spawnArea = new Vector2(5f, 5f); // Range for random spawning
+    int mask = LayerMask.GetMask("spriteLayer");
 
     private void Start()
     {
@@ -21,11 +23,22 @@ public class Spawner : MonoBehaviour
 
     void SpawnSprite()
     {
-        // Generate a random position within the specified range
-        Vector3 randomPosition = transform.position + new Vector3(Random.Range(-spawnArea.x / 2f, spawnArea.x / 2f), 0f, Random.Range(-spawnArea.y / 2f, spawnArea.y / 2f));
+        float yBounds = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).y,
+            Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height)).y);
+        float xBounds = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).x,
+            Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, 0)).x);
+        Vector2 spawnPos = new Vector2(xBounds, yBounds);
 
-        // Instantiate a new sprite at the random position
-        Instantiate(spritePrefab, randomPosition, Quaternion.identity, transform);
+        Collider2D spriteCollision = Physics2D.OverlapBox(spawnPos, new Vector2(1.0f,1.0f), mask);
+        if (spriteCollision != null)
+        {
+            Instantiate(spritePrefab, spawnPos, Quaternion.identity);
+        }
+
+
+
+
+
     }
 
     // Call this method when an item is destroyed or removed
